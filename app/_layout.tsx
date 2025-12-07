@@ -20,7 +20,7 @@ export default function RootLayout() {
     if (process.env.EXPO_PUBLIC_TEMPO && Platform.OS === "web") {
       try {
         const { TempoDevtools } = require("tempo-devtools");
-        TempoDevtools.init();
+        ;
       } catch (error) {
         console.warn("Tempo devtools initialization failed:", error);
       }
