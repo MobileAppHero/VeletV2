@@ -8,14 +8,16 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
-import { Plus, Gift, Calendar, User } from "lucide-react-native";
+import { Plus, Gift, Calendar, User, LogOut } from "lucide-react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import ProfileCard from "./components/ProfileCard";
 import SuggestionCardList from "./components/SuggestionCardList";
 import OnboardingFlow from "./components/OnboardingFlow";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function HomeScreen() {
+  const { user, signOut } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [profiles, setProfiles] = useState([
     {
@@ -61,6 +63,14 @@ export default function HomeScreen() {
     setShowOnboarding(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <LinearGradient
       colors={["#FFE1C6", "#FFCDB8", "#FFB4A2"]}
@@ -80,14 +90,15 @@ export default function HomeScreen() {
               <View>
                 <Text className="text-3xl font-bold text-gray-800">Valet</Text>
                 <Text className="text-gray-600 text-base">
-                  Your personal gift concierge
+                  {user?.email ? `Welcome, ${user.email}` : "Your personal gift concierge"}
                 </Text>
               </View>
-              <Image
-                source={require("../assets/images/icon.png")}
-                style={{ width: 50, height: 50 }}
-                contentFit="contain"
-              />
+              <TouchableOpacity
+                onPress={handleLogout}
+                className="bg-white p-2 rounded-full shadow-sm"
+              >
+                <LogOut size={24} color="#E45B5B" />
+              </TouchableOpacity>
             </View>
 
             {/* Profiles Section */}
@@ -109,8 +120,11 @@ export default function HomeScreen() {
                 {profiles.map((profile) => (
                   <ProfileCard
                     key={profile.id}
-                    profile={profile}
-                    onEdit={() => console.log("Edit profile", profile.id)}
+                    id={profile.id}
+                    name={profile.name}
+                    relationship={profile.relationship}
+                    birthday={profile.birthday}
+                    onEdit={() => router.push(`/profile/edit/${profile.id}`)}
                   />
                 ))}
               </View>
@@ -123,34 +137,44 @@ export default function HomeScreen() {
               </Text>
               {upcomingBirthdays.length > 0 ? (
                 upcomingBirthdays.map((profile) => (
-                  <View
+                  <TouchableOpacity
                     key={profile.id}
-                    className="bg-white p-4 rounded-xl shadow-sm mb-3 flex-row justify-between items-center"
+                    onPress={() => router.push(`/profile/${profile.id}`)}
+                    activeOpacity={0.8}
+                    className="bg-white p-4 rounded-xl shadow-sm mb-3"
                   >
-                    <View className="flex-row items-center">
-                      <View className="w-10 h-10 rounded-full bg-pink-200 items-center justify-center mr-3">
-                        <Text className="font-bold text-pink-800">
-                          {profile.name.charAt(0)}
-                        </Text>
+                    <View className="flex-row justify-between items-center">
+                      <View className="flex-row items-center">
+                        <View className="w-10 h-10 rounded-full bg-pink-200 items-center justify-center mr-3">
+                          <Text className="font-bold text-pink-800">
+                            {profile.name.charAt(0)}
+                          </Text>
+                        </View>
+                        <View>
+                          <Text className="font-medium text-gray-800">
+                            {profile.name}
+                          </Text>
+                          <Text className="text-gray-500">
+                            {new Date(profile.birthday).toLocaleDateString(
+                              "en-US",
+                              { month: "long", day: "numeric" },
+                            )}
+                          </Text>
+                        </View>
                       </View>
-                      <View>
-                        <Text className="font-medium text-gray-800">
-                          {profile.name}
+                      <TouchableOpacity 
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          console.log('Set reminder for:', profile.name);
+                        }}
+                        className="bg-pink-100 px-3 py-1 rounded-full"
+                      >
+                        <Text className="text-pink-800 font-medium">
+                          Set Reminder
                         </Text>
-                        <Text className="text-gray-500">
-                          {new Date(profile.birthday).toLocaleDateString(
-                            "en-US",
-                            { month: "long", day: "numeric" },
-                          )}
-                        </Text>
-                      </View>
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity className="bg-pink-100 px-3 py-1 rounded-full">
-                      <Text className="text-pink-800 font-medium">
-                        Set Reminder
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                  </TouchableOpacity>
                 ))
               ) : (
                 <View className="bg-white p-4 rounded-xl shadow-sm items-center">
@@ -174,21 +198,30 @@ export default function HomeScreen() {
 
             {/* Navigation Buttons */}
             <View className="flex-row justify-around mb-8 bg-white rounded-2xl p-4 shadow-sm">
-              <TouchableOpacity className="items-center">
+              <TouchableOpacity 
+                className="items-center"
+                onPress={() => router.push("/my-profile")}
+              >
                 <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mb-1">
                   <User size={24} color="#3B82F6" />
                 </View>
-                <Text className="text-gray-800">Profiles</Text>
+                <Text className="text-gray-800">Profile</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity className="items-center">
+              <TouchableOpacity 
+                className="items-center"
+                onPress={() => router.push("/gifts")}
+              >
                 <View className="w-12 h-12 rounded-full bg-green-100 items-center justify-center mb-1">
                   <Gift size={24} color="#10B981" />
                 </View>
                 <Text className="text-gray-800">Gifts</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity className="items-center">
+              <TouchableOpacity 
+                className="items-center"
+                onPress={() => router.push("/birthdays")}
+              >
                 <View className="w-12 h-12 rounded-full bg-purple-100 items-center justify-center mb-1">
                   <Calendar size={24} color="#8B5CF6" />
                 </View>
