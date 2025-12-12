@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "test-tempo",
+    "name": "Gift Valet",
     "slug": "test-tempo",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,12 +10,13 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.digitalsleep.valet",
+      "bundleIdentifier": "com.mobileapphero.giftvalet",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "package": "com.mobileapphero.giftvalet",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -48,6 +49,7 @@
       "eas": {
         "projectId": "d8fe5979-a3ca-4547-bc71-a05cc34e5eb4"
       }
-    }
+    },
+    "owner": "digitalsleep"
   }
 }

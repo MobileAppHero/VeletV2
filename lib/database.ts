@@ -8,6 +8,12 @@ export interface UserProfile {
   birthday?: string
   location?: string
   photo_url?: string
+  interests?: string[]
+  places?: any[] // JSON array of {name, note}
+  notes?: any[] // JSON array of {title, content}
+  dates?: any[] // JSON array of {name, date, recurring}
+  sizes?: any // JSON object with clothing sizes
+  gift_ideas?: any[] // JSON array of {title, description, link, price}
   created_at?: string
   updated_at?: string
 }
@@ -23,6 +29,7 @@ export interface LovedOneProfile {
   favorite_artist?: string
   splurge_on?: string
   photo_url?: string
+  gift_ideas?: any[] // JSON array of {title, description, link, price}
   created_at?: string
   updated_at?: string
 }
@@ -55,6 +62,8 @@ export async function upsertUserProfile(profile: UserProfile) {
       .upsert({
         ...profile,
         updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
       })
       .select()
       .single()
